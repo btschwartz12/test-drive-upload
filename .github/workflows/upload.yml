@@ -1,0 +1,29 @@
+name: upload-file
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set variables
+        id: vars
+        run: |
+          echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+          echo "time=$(date --iso-8601=seconds)" >> $GITHUB_OUTPUT
+
+      - name: Upload file to Google Drive
+        uses: CarsonHoffman/google-drive-upload-git-action@2ecaa78ac9430e42659ae124728d9ee418db99fb
+        with:
+          credentials: ${{ secrets.GOOGLE_DRIVE_CREDENTIALS }}
+          filename: "./file.txt"
+          folderId: ${{ secrets.TEST_DRIVE_FOLDER_ID }}
+          name: "file-${{ steps.vars.outputs.time }}-${{ steps.vars.outputs.sha_short }}.txt"
+
